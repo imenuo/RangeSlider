@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:math' as math;
 
 typedef RangeSliderCallback(double lowerValue, double upperValue);
 typedef RangeSliderValueIndicatorFormatter(int index, double value);
@@ -1084,6 +1085,23 @@ class _RenderRangeSlider extends RenderBox {
     final double valueDelta = details.primaryDelta / _trackLength;
     _currentDragValue += valueDelta;
 
+    if (_upperValue == _lowerValue &&
+        _previousActiveThumb == _ActiveThumb.sameThumb) {
+      if (details.primaryDelta > 0) {
+        _activeThumb = _ActiveThumb.upperThumb;
+        _minDragValue = _discretize(_lowerValue);
+        _maxDragValue = 1.0;
+        _previousActiveThumb = _activeThumb;
+      }
+
+      if (details.primaryDelta < 0) {
+        _activeThumb = _ActiveThumb.lowerThumb;
+        _minDragValue = 0.0;
+        _maxDragValue = _discretize(_upperValue);
+        _previousActiveThumb = _activeThumb;
+      }
+    }
+
     // we need to limit the movement to the track
     _onRangeChanged(_currentDragValue.clamp(_minDragValue, _maxDragValue));
   }
@@ -1190,17 +1208,19 @@ class _RenderRangeSlider extends RenderBox {
     var _thumbUpperExpandedRect = Rect.fromCircle(
         center: _thumbUpperRect.centerRight,
         radius: _thumbRadius * _touchRadiusExpansionRatio);
+    /* Ignore the divisionOffset to make them the same point
     double divisionOffset = (_divisions != null)
         ? _discretize(1.0 / _divisions)
         : (_thumbRadius * 2.0) / _trackLength;
+    */
 
     if (_thumbLowerExpandedRect.contains(position)) {
       _activeThumb = _ActiveThumb.lowerThumb;
       _minDragValue = 0.0;
-      _maxDragValue = _discretize(_upperValue - divisionOffset);
+      _maxDragValue = _discretize(_upperValue);
     } else if (_thumbUpperExpandedRect.contains(position)) {
       _activeThumb = _ActiveThumb.upperThumb;
-      _minDragValue = _discretize(_lowerValue + divisionOffset);
+      _minDragValue = _discretize(_lowerValue);
       _maxDragValue = 1.0;
     } else {
       _activeThumb = _ActiveThumb.none;
@@ -1216,4 +1236,6 @@ enum _ActiveThumb {
   lowerThumb,
   // the upperThumb is active
   upperThumb,
+  // the two thumbs are in the same position
+  sameThumb,
 }
