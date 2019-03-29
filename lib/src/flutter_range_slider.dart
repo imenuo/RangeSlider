@@ -557,11 +557,11 @@ class _RenderRangeSlider extends RenderBox {
   // -------------------------------------------------
   static const double _overlayRadius = 16.0;
   static const double _overlayDiameter = _overlayRadius;
-  static const double _trackHeight = 2.0;
+  static const double _trackHeight = 4.0;
   static const double _preferredTrackWidth = 144.0;
   static const double _preferredTotalWidth =
       _preferredTrackWidth + 2 * _overlayDiameter;
-  static const double _tickRadius = _trackHeight / 2.0;
+  static const double _tickRadius = 4.0;
   static final Tween<double> _overlayRadiusTween =
       new Tween<double>(begin: 0.0, end: _overlayRadius);
 
