@@ -1214,7 +1214,10 @@ class _RenderRangeSlider extends RenderBox {
         : (_thumbRadius * 2.0) / _trackLength;
     */
 
-    if (_thumbLowerExpandedRect.contains(position)) {
+    if (_thumbLowerExpandedRect.contains(position) &&
+        _thumbUpperExpandedRect.contains(position)) {
+      _activeThumb = _ActiveThumb.sameThumb;
+    } else if (_thumbLowerExpandedRect.contains(position)) {
       _activeThumb = _ActiveThumb.lowerThumb;
       _minDragValue = 0.0;
       _maxDragValue = _discretize(_upperValue);
