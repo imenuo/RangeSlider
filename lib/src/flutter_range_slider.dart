@@ -878,9 +878,16 @@ class _RenderRangeSlider extends RenderBox {
     // Draw the track
     if (_lowerValue > 0.0) {
       // Draw the unselected left range
-      canvas.drawRect(
-          new Rect.fromLTRB(
-              _trackLeft, _trackTop, _thumbLeftPosition, _trackBottom),
+      // with rounded corners
+      canvas.drawRRect(
+          RRect.fromLTRBAndCorners(
+            _trackLeft,
+            _trackTop,
+            _thumbLeftPosition,
+            _trackBottom,
+            topLeft: Radius.circular(trackRadius),
+            bottomLeft: Radius.circular(trackRadius),
+          ),
           unselectedTrackPaint);
     }
     // Draw the selected range
@@ -891,9 +898,16 @@ class _RenderRangeSlider extends RenderBox {
 
     if (_upperValue < 1.0) {
       // Draw the unselected right range
-      canvas.drawRect(
-          new Rect.fromLTRB(
-              _thumbRightPosition, _trackTop, _trackRight, _trackBottom),
+      // with rounded corners
+      canvas.drawRRect(
+          RRect.fromLTRBAndCorners(
+            _thumbRightPosition,
+            _trackTop,
+            _trackRight,
+            _trackBottom,
+            topRight: Radius.circular(trackRadius),
+            bottomRight: Radius.circular(trackRadius),
+          ),
           unselectedTrackPaint);
     }
   }
