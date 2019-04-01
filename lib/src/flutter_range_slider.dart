@@ -959,30 +959,60 @@ class _RenderRangeSlider extends RenderBox {
     _thumbUpperRect = new Rect.fromCircle(
         center: thumbUpperCenter - offset, radius: thumbRadius);
 
-    // Paint the thumbs, via the Theme
-    _sliderTheme.thumbShape.paint(
-      context,
-      thumbLowerCenter,
-      isDiscrete: (_divisions != null),
-      parentBox: this,
-      sliderTheme: _sliderTheme,
-      value: _lowerValue,
-      enableAnimation: _enableAnimation,
-      activationAnimation: _valueIndicatorAnimation,
-      labelPainter: _valueIndicatorPainter,
-    );
+    // Paint active thumb after the inactive one
+    if ((_activeThumb == _ActiveThumb.none &&
+            _previousActiveThumb == _ActiveThumb.lowerThumb) ||
+        _activeThumb == _ActiveThumb.lowerThumb) {
+      _sliderTheme.thumbShape.paint(
+        context,
+        thumbUpperCenter,
+        isDiscrete: (_divisions != null),
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        value: _upperValue,
+        enableAnimation: _enableAnimation,
+        activationAnimation: _valueIndicatorAnimation,
+        labelPainter: _valueIndicatorPainter,
+      );
 
-    _sliderTheme.thumbShape.paint(
-      context,
-      thumbUpperCenter,
-      isDiscrete: (_divisions != null),
-      parentBox: this,
-      sliderTheme: _sliderTheme,
-      value: _upperValue,
-      enableAnimation: _enableAnimation,
-      activationAnimation: _valueIndicatorAnimation,
-      labelPainter: _valueIndicatorPainter,
-    );
+      // Paint the thumbs, via the Theme
+      _sliderTheme.thumbShape.paint(
+        context,
+        thumbLowerCenter,
+        isDiscrete: (_divisions != null),
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        value: _lowerValue,
+        enableAnimation: _enableAnimation,
+        activationAnimation: _valueIndicatorAnimation,
+        labelPainter: _valueIndicatorPainter,
+      );
+    } else {
+      // Paint the thumbs, via the Theme
+      _sliderTheme.thumbShape.paint(
+        context,
+        thumbLowerCenter,
+        isDiscrete: (_divisions != null),
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        value: _lowerValue,
+        enableAnimation: _enableAnimation,
+        activationAnimation: _valueIndicatorAnimation,
+        labelPainter: _valueIndicatorPainter,
+      );
+
+      _sliderTheme.thumbShape.paint(
+        context,
+        thumbUpperCenter,
+        isDiscrete: (_divisions != null),
+        parentBox: this,
+        sliderTheme: _sliderTheme,
+        value: _upperValue,
+        enableAnimation: _enableAnimation,
+        activationAnimation: _valueIndicatorAnimation,
+        labelPainter: _valueIndicatorPainter,
+      );
+    }
   }
 
   // ---------------------------------------------
@@ -1085,8 +1115,7 @@ class _RenderRangeSlider extends RenderBox {
     final double valueDelta = details.primaryDelta / _trackLength;
     _currentDragValue += valueDelta;
 
-    if (_upperValue == _lowerValue &&
-        _previousActiveThumb == _ActiveThumb.sameThumb) {
+    if (_previousActiveThumb == _ActiveThumb.sameThumb) {
       if (details.primaryDelta > 0) {
         _activeThumb = _ActiveThumb.upperThumb;
         _minDragValue = _discretize(_lowerValue);
@@ -1214,9 +1243,12 @@ class _RenderRangeSlider extends RenderBox {
         : (_thumbRadius * 2.0) / _trackLength;
     */
 
-    if (_thumbLowerExpandedRect.contains(position) &&
-        _thumbUpperExpandedRect.contains(position)) {
+    // Consider the thumb size is bigger than division,
+    // so only the value can decide whether they are in the same position
+    if (_lowerValue == _upperValue) {
       _activeThumb = _ActiveThumb.sameThumb;
+      _minDragValue = 0.0;
+      _maxDragValue = 1.0;
     } else if (_thumbLowerExpandedRect.contains(position)) {
       _activeThumb = _ActiveThumb.lowerThumb;
       _minDragValue = 0.0;
