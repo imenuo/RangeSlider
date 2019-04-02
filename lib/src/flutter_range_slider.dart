@@ -854,9 +854,12 @@ class _RenderRangeSlider extends RenderBox {
   void _paintTrack(Canvas canvas, Offset offset) {
     final double trackRadius = _trackHeight / 2.0;
 
-    _trackLength = size.width - 2 * _overlayDiameter;
+    // Visual track length is size.width - 2 * _overlayDiameter,
+    // but the real track length is the following to force the whole thumb within the track
+    _trackLength = size.width - 4 * _overlayDiameter;
     _trackVerticalCenter = offset.dy + (size.height) / 2.0;
-    _trackLeft = offset.dx + _overlayDiameter;
+    // Track left needs to consider the extra left part track
+    _trackLeft = offset.dx + _overlayDiameter + _overlayDiameter;
     _trackTop = _trackVerticalCenter - trackRadius;
     _trackBottom = _trackVerticalCenter + trackRadius;
     _trackRight = _trackLeft + _trackLength;
@@ -875,19 +878,24 @@ class _RenderRangeSlider extends RenderBox {
           ? _sliderTheme.activeTrackColor
           : _sliderTheme.disabledActiveTrackColor;
 
+    // Fixed extra left part
+    canvas.drawRRect(
+        RRect.fromLTRBAndCorners(
+          _trackLeft - _overlayDiameter,
+          _trackTop,
+          _trackLeft,
+          _trackBottom,
+          topLeft: Radius.circular(trackRadius),
+          bottomLeft: Radius.circular(trackRadius),
+        ),
+        unselectedTrackPaint);
+
     // Draw the track
     if (_lowerValue > 0.0) {
       // Draw the unselected left range
-      // with rounded corners
-      canvas.drawRRect(
-          RRect.fromLTRBAndCorners(
-            _trackLeft,
-            _trackTop,
-            _thumbLeftPosition,
-            _trackBottom,
-            topLeft: Radius.circular(trackRadius),
-            bottomLeft: Radius.circular(trackRadius),
-          ),
+      canvas.drawRect(
+          Rect.fromLTRB(
+              _trackLeft, _trackTop, _thumbLeftPosition, _trackBottom),
           unselectedTrackPaint);
     }
     // Draw the selected range
@@ -898,18 +906,23 @@ class _RenderRangeSlider extends RenderBox {
 
     if (_upperValue < 1.0) {
       // Draw the unselected right range
-      // with rounded corners
-      canvas.drawRRect(
-          RRect.fromLTRBAndCorners(
-            _thumbRightPosition,
-            _trackTop,
-            _trackRight,
-            _trackBottom,
-            topRight: Radius.circular(trackRadius),
-            bottomRight: Radius.circular(trackRadius),
-          ),
+      canvas.drawRect(
+          Rect.fromLTRB(
+              _thumbRightPosition, _trackTop, _trackRight, _trackBottom),
           unselectedTrackPaint);
     }
+
+    // Fixed extra right part
+    canvas.drawRRect(
+        RRect.fromLTRBAndCorners(
+          _trackRight,
+          _trackTop,
+          _trackRight + _overlayDiameter,
+          _trackBottom,
+          topRight: Radius.circular(trackRadius),
+          bottomRight: Radius.circular(trackRadius),
+        ),
+        unselectedTrackPaint);
   }
 
   // ---------------------------------------------
